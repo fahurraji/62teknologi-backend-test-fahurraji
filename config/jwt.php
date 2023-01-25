@@ -88,8 +88,8 @@ return [
     | Notice: If you set this to null you should remove 'exp' element from 'required_claims' list.
     |
     */
-
-    'ttl' => env('JWT_TTL', 60),
+    // token jwt 24 jam
+    'ttl' => env('JWT_TTL', 1440),
 
     /*
     |--------------------------------------------------------------------------

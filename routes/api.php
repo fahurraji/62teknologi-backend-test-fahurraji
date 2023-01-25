@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\BussinessController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,3 +27,15 @@ Route::post('/login', App\Http\Controllers\Api\LoginController::class)->name('lo
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// bussiness
+Route::post('addBussiness','App\Http\Controllers\Api\MasterdataController@addBussiness')->middleware('auth:api');
+// Route::get('/all', App\Http\Controllers\Api\BussinessController@getBussiness);
+Route::get('all','App\Http\Controllers\Api\BussinessController@getBussiness')->middleware('auth:api');
+Route::get('search','App\Http\Controllers\Api\BussinessController@search');
+
+
+// master data category
+Route::post('addCategory','App\Http\Controllers\Api\MasterdataController@addCategory')->middleware('auth:api');
+Route::post('editCategory','App\Http\Controllers\Api\MasterdataController@editCategory')->middleware('auth:api');
+Route::post('deleteCategory','App\Http\Controllers\Api\MasterdataController@deleteCategory')->middleware('auth:api');
