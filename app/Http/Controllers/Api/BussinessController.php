@@ -5,38 +5,27 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\BussinessModel;
 
 class BussinessController extends Controller
 {
     //
-    public function search()
+    public function search(Request $request)
     {
-                
-    }
-
-    public function addBussiness()
-    {
-
-    }
-
-    public function editBussiness()
-    {
-
-    }
-
-    public function deleteBussiness()
-    {
-
-    }
-
-    public function getBussiness()
-    {
-        $data = DB::Table('bussiness')->get();
-        // dd($data);
+        if($request->id)
+        {
+            // jika mengirimkan parameter id
+            $data = DB::Table('bussiness')->where('id',$request->id)->get();
+        }else
+        {
+            // jika tidak mengirimkan parameter id
+            $data = $this->semua();
+        }
         if($data)
         {
             foreach($data as $r=>$v){
-                $coordinat = "";
+                $coordinat = $this->coordinat($data[$r]->id);
+
                 $location="";
                 $category = "";
                 $transaksi = "";
@@ -45,7 +34,7 @@ class BussinessController extends Controller
                 "Bussiness" => $data,
                 "region" => array(
                      "center"=>array(
-                         "latitude" => "",
+                         "latitude" => $coordinat,
                          "longitude" => ""
                      )
                  ),
@@ -66,52 +55,122 @@ class BussinessController extends Controller
              );         
             return response()->json($records);
         }
+    }
+
+
+    public function editBussiness()
+    {
+
+    }
+
+    public function deleteBussiness()
+    {
+
+    }
+
+    public function getBussiness(Request $request)
+    {
+        $buss = new BussinessModel;
+        $latitude = $request->latitude;
+        $longitude = $request->longitude;
+        $id = $request->id;
+        if($latitude== null && $longitude == null)
+        {
+            $latitude = -6.188767871517751;
+            $longitude = 106.79638043944114;
+        }
+        
+        if($request->id)
+        {
+            // jika mengirimkan parameter id
+            $data = $buss->byId($request->id);
+            // $data = $buss->jarak($request->latitude,$request->longitude,$request->id);
+            // print($data);exit;
+        }else
+        {
+            // jika tidak mengirimkan parameter id
+            $data = $buss->semua();
+            // print_r($data);exit;
+        }
+        if($data)
+        {
+           
+            
+            foreach($data as $r=>$v){
+                
+                $coordinat = $buss->coordinat($data[$r]->id);
+                $location = $buss->location($data[$r]->id);
+                $category = $buss->category($data[$r]->id);
+                $transaksi = $buss->transaksi($data[$r]->id);
+                $dist = $buss->jarak($latitude,$longitude,$data[$r]->id);
+                
+                if($location->IsNotEmpty()){
+                    $loc = $location['0'];
+                
+                }
+                
+                $list[]=array(
+                    "id"=> $data[$r]->id,
+                    "name"=> $data[$r]->name,
+                    "alias"=> $data[$r]->alias,
+                    "category" => $category,
+                    "image_url"=>  $data[$r]->image_url,
+                    "price"=> $data[$r]->price,
+                    "url"=>  $data[$r]->url,
+                    "phone"=> $data[$r]->phone,
+                    "display_phone"=> $data[$r]->display_phone,
+                    "is_close"=> $data[$r]->is_close,
+                    "coordinates" =>$coordinat['0'],
+                    "location"=>array(
+                        "address1"=> $loc->address1,
+                        "address2"=> $loc->address2,
+                        "address3"=> $loc->address3,
+                        "city"=> $loc->city,
+                        "zip_code"=> $loc->zip_code,
+                        "country"=> $loc->country,
+                        "state"=> $loc->state,
+                        'display_address'=>[
+                            $loc->address1,$loc->address2,$loc->address3,$loc->city,$loc->zip_code,$loc->country
+                        ]
+                    ),
+                    "transaction"=>$transaksi,
+                    "distance"=> $dist['0']->jarak
+                );
+                // print_r($list);exit;
+            }
+            // exit;
+            $records = array(
+                "Bussiness"=>
+                    $list, 
+                
+                "region" => array(
+                    "center"=>array(
+                        "latitude" => $latitude,
+                        "longitude" => $longitude
+                    )
+                 ),
+                 "total" => count($data)
+             );              
+         return response()->json($records);
+        }else
+        {
+            $records = array(
+                "Bussiness" => [],
+                "region" => array(
+                     "center"=>array(
+                         "latitude" => $latitude,
+                         "longitude" => $longitude
+                     )
+                 ),
+                 "total" => 0
+             );         
+            return response()->json($records);
+        }
          
     }
 
-    public function Success()
-    {
-        $records = array(
-            "id"=> "H4jJ7XB3CetIr1pg56CczQ",
-            "alias"=> "levain-bakery-new-york",
-            "name"=> "Levain Bakery",
-            "image_url"=> "https://s3-media3.fl.yelpcdn.com/bphoto/DH29qeTmPotJbCSzkjYJwg/o.jpg",
-            "is_closed"=> false,
-            "url"=> "https://www.yelp.com/biz/levain-bakery-new-york?adjust_creative=DSj6I8qbyHf-Zm2fGExuug&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_search&utm_source=DSj6I8qbyHf-Zm2fGExuug",
-            "review_count"=> 9427,
-            // "categories"=> [
-            //     {
-            //         "alias": "bakeries",
-            //         "title": "Bakeries"
-            //     }
-            // ],
-            "rating"=> 4.5,
-            // "coordinates"=> {
-            //     "latitude": 40.779961,
-            //     "longitude": -73.980299
-            // },
-            // "transactions"=> [],
-            "price"=> "$$",
-            // "location"=> {
-            //     "address1": "167 W 74th St",
-            //     "address2": "",
-            //     "address3": "",
-            //     "city": "New York",
-            //     "zip_code": "10023",
-            //     "country": "US",
-            //     "state": "NY",
-            //     "display_address": [
-            //         "167 W 74th St",
-            //         "New York, NY 10023"
-            //     ]
-            // },
-            "phone"=> "+19174643769",
-            "display_phone"=> "(917) 464-3769",
-            "distance"=> 8115.903194093832
-        );     
-    }
-
-    public function Unautorazion()
+   
+    private function Unautorazion()
     {
         $data = array(
             "error"=>array(
@@ -121,7 +180,7 @@ class BussinessController extends Controller
         );
     }
     // error 400 invalid request
-    public function Invalid_request()
+    private function Invalid_request()
     {
         $data = array(
             "error"=>array(
@@ -133,7 +192,7 @@ class BussinessController extends Controller
         // $response = $response()->json($data);
     }
     // error 500 
-    public function Internal_error()
+    private function Internal_error()
     {
         $data = array(
             "error"=>array(
@@ -144,7 +203,7 @@ class BussinessController extends Controller
         $response = $response()->json($data);
     }
     // error 401 token invalid
-    public function Invalid_token()
+    private function Invalid_token()
     {
         $data = array(
             "error"=>array(
@@ -154,7 +213,7 @@ class BussinessController extends Controller
         );
     }
     // error 403
-    public function Aut_error()
+    private function Aut_error()
     {
         $data = array(
             "error"=>array(
@@ -164,7 +223,7 @@ class BussinessController extends Controller
         );
     }
     // error 404
-    public function Resource_notfound()
+    private function Resource_notfound()
     {
         $data = array(
             "error"=>array(
@@ -174,7 +233,7 @@ class BussinessController extends Controller
         );
     }
     // error 413
-    public function Payload_too_large()
+    private function Payload_too_large()
     {
         $data = array(
             "error"=>array(
@@ -184,7 +243,7 @@ class BussinessController extends Controller
         );
     }
     // error 429
-    public function Request_large()
+    private function Request_large()
     {
         $data = array(
             "error"=>array(
@@ -194,7 +253,7 @@ class BussinessController extends Controller
         );
     }
     // error 503
-    public function Unuvailable()
+    private function Unuvailable()
     {
         $data = array(
             "error"=>array(

@@ -30,9 +30,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 // bussiness
 Route::post('addBussiness','App\Http\Controllers\Api\MasterdataController@addBussiness')->middleware('auth:api');
-// Route::get('/all', App\Http\Controllers\Api\BussinessController@getBussiness);
-Route::get('all','App\Http\Controllers\Api\BussinessController@getBussiness')->middleware('auth:api');
-Route::get('search','App\Http\Controllers\Api\BussinessController@search');
+Route::get('bussiness','App\Http\Controllers\Api\BussinessController@getBussiness')->middleware('auth:api');
+Route::get('search','App\Http\Controllers\Api\BussinessController@search')->middleware('auth:api');
 
 
 // master data category

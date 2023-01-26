@@ -130,6 +130,10 @@ class MasterdataController extends Controller
             'name' => 'required',
             'alias' => 'required',
             'phone' => 'required|min:10|confirmed',
+            'address1' => 'required',
+            'city'=>'required',
+            'cat_id'=>'required',
+            
         ]);
 
         //jika validasi gagal
@@ -141,10 +145,10 @@ class MasterdataController extends Controller
                 ]
             );
         }
-
+        $code = Str::uuid()->toString(16);
         $insert = DB::Table('bussiness')->insert(
             [
-                'id' => Str::uuid()->toString(16),
+                'id' => $code,
                 // 'id'=> random_bytes(16),
                 'name' => $request->name,
                 'alias' => $request->alias,
@@ -155,8 +159,35 @@ class MasterdataController extends Controller
                 'phone' => $request->phone,
                 'display_phone' => $request->display_phone,
             ]);
+        
         if($insert)
         {
+            $insert = DB::Table('buss_category')->insert(
+                [
+                    'buss_id'=>$code,
+                    'cat_id' => $request->cat_id
+                ]
+            );
+            $insert = DB::Table('buss_trans')->insert(
+                [
+                    'buss_id'=>$code,
+                    'trans_id' => $request->cat_id
+                ]
+            );
+            $insert = DB::Table('bussiness_location')->insert(
+                [
+                    'buss_id'=>$code,
+                    'address1'=>$request->address1,
+                    'address2'=>$request->address2,
+                    'address3'=>$request->address3,
+                    'city'=>$request->city,
+                    'zip_code'=>$request->zip_code,
+                    'country'=> $request->country,
+                    'state'=>$request->state,
+                    'latitude'=>$request->latitude,
+                    'longitude'=>$request->longitude,
+                ]
+            );
             return response()->json([
                 'code'=>200,
                 'success' => true,
