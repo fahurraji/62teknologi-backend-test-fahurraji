@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Models\BussinessModel;
 
 class MasterdataController extends Controller
 {
@@ -125,31 +126,11 @@ class MasterdataController extends Controller
 
     public function addBussiness(Request $request)
     {
-        //membuat validation
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'alias' => 'required',
-            'phone' => 'required|min:10|confirmed',
-            'address1' => 'required',
-            'city'=>'required',
-            'cat_id'=>'required',
-            
-        ]);
-
-        //jika validasi gagal
-        if ($validator->fails()) {
-            return response()->json(
-                [
-                    'code'=>400,
-                    'success' => false,
-                ]
-            );
-        }
-        $code = Str::uuid()->toString(16);
-        $insert = DB::Table('bussiness')->insert(
-            [
+        
+        $buss = new BussinessModel;
+        $code = Str::uuid()->toString();
+        $input =array(
                 'id' => $code,
-                // 'id'=> random_bytes(16),
                 'name' => $request->name,
                 'alias' => $request->alias,
                 'image_url' => $request->image_url,
@@ -158,47 +139,56 @@ class MasterdataController extends Controller
                 'price'=> $request->price,
                 'phone' => $request->phone,
                 'display_phone' => $request->display_phone,
-            ]);
-        
+            );
+        $insert = $buss->insertBussiness("add",$input);
         if($insert)
         {
-            $insert = DB::Table('buss_category')->insert(
-                [
-                    'buss_id'=>$code,
-                    'cat_id' => $request->cat_id
-                ]
+            $cat_id = $request->cat_id;
+                          
+                foreach($cat_id as $k=>$v){
+                    $input1[] = array(
+                        'buss_id'=>$code,
+                        'cat_id' => $cat_id[$k]
+                    );
+                }
+               
+            $buss->insertCategory("add",$input1);
+            $trans_id = $request->trans_id;
+            foreach($trans_id as $k=>$v){
+                $input2[] = array(
+                        'buss_id'=>$code,
+                        'trans_id' => $trans_id[$k]
+                );
+            }
+            $buss->insertTransaksi("add",$input2);
+            $input3 =array(
+                'buss_id'=>$code,
+                'address1'=>$request->address1,
+                'address2'=>$request->address2,
+                'address3'=>$request->address3,
+                'city'=>$request->city,
+                'zip_code'=>$request->zip_code,
+                'country'=> $request->country,
+                'state'=>$request->state,
+                'latitude'=>$request->latitude,
+                'longitude'=>$request->longitude,
             );
-            $insert = DB::Table('buss_trans')->insert(
-                [
-                    'buss_id'=>$code,
-                    'trans_id' => $request->cat_id
-                ]
-            );
-            $insert = DB::Table('bussiness_location')->insert(
-                [
-                    'buss_id'=>$code,
-                    'address1'=>$request->address1,
-                    'address2'=>$request->address2,
-                    'address3'=>$request->address3,
-                    'city'=>$request->city,
-                    'zip_code'=>$request->zip_code,
-                    'country'=> $request->country,
-                    'state'=>$request->state,
-                    'latitude'=>$request->latitude,
-                    'longitude'=>$request->longitude,
-                ]
-            );
+            // print_r($input);exit;
+            $buss->insertLocation("add",$input3);
             return response()->json([
                 'code'=>200,
                 'success' => true,
                 'message' => 'Insert Data Success'
             ], 200);
-        }else
+        }
+        else
         {
-            return response()->json([
-                'code'=>400,
-                'success' => false,  
-            ], 400);
+            return response()->json(
+                [
+                    'code'=>400,
+                    'success' => false,
+                ]
+            );
         }
     }
 }

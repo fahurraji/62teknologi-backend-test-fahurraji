@@ -29,9 +29,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 // bussiness
-Route::post('addBussiness','App\Http\Controllers\Api\MasterdataController@addBussiness')->middleware('auth:api');
+Route::post('tambah','App\Http\Controllers\Api\MasterdataController@addBussiness')->middleware('auth:api');
 Route::get('bussiness','App\Http\Controllers\Api\BussinessController@getBussiness')->middleware('auth:api');
-Route::get('search','App\Http\Controllers\Api\BussinessController@search')->middleware('auth:api');
+Route::get('bussiness/search','App\Http\Controllers\Api\BussinessController@search')->middleware('auth:api');
+Route::post('delete','App\Http\Controllers\Api\BussinessController@deleteBussiness')->middleware('auth:api');
 
 
 // master data category
